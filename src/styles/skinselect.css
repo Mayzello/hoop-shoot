@@ -1,0 +1,112 @@
+body {
+  margin: 0;
+  font-family: 'Arial Black', sans-serif;
+  background: #000;
+}
+
+.skin-select-container {
+  background-image: url("../assets/bg.png");
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  min-height: 100vh;
+  padding: 40px 20px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.skin-select-container::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 0;
+}
+
+.skin-select-container h2 {
+  z-index: 1;
+  color: #f57c00;
+  font-size: 32px;
+  margin-bottom: 30px;
+  text-shadow: 2px 2px 4px #000;
+}
+
+.skin-list {
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 20px;
+  width: 100%;
+  max-width: 700px;
+}
+
+.skin {
+  background: #ffffff10;
+  backdrop-filter: blur(5px);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  transition: 0.3s;
+  box-shadow: 0 0 8px rgba(0,0,0,0.3);
+}
+
+.skin.selected {
+  border-color: #f57c00;
+  box-shadow: 0 0 12px rgba(255, 123, 0, 0.6);
+}
+
+.skin img {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 10px;
+}
+
+.skin p {
+  font-size: 16px;
+  margin: 8px 0;
+  color: #fff;
+}
+
+.skin button {
+  margin-top: 6px;
+  padding: 8px 12px;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.skin button:hover {
+  background: #125ea9;
+}
+
+.skin button:disabled {
+  background: #555;
+  cursor: not-allowed;
+  color: #ccc;
+}
+.back-btn {
+  margin-top: 30px;
+  padding: 12px 20px;
+  background: #1976d2;
+  color: white;
+  border: none;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+  transition: background 0.3s;
+  z-index: 100;
+  position: relative;
+}
+
+.back-btn:hover {
+  background: #125ea9;
+}

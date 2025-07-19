@@ -1,0 +1,83 @@
+/* Pastikan body dan html full height & tanpa scroll */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.splash-container {
+  height: 100vh;
+  width: 100vw;
+  background-image: url("../assets/bg.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+  font-family: sans-serif;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+}
+
+
+.title {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  text-shadow: 2px 2px #00000066;
+}
+
+.ball {
+  width: 100px;
+  height: 100px;
+}
+
+.bounce {
+  animation: bounce 1s infinite;
+}
+
+.no-bounce {
+  animation: none;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-30px);
+  }
+}
+
+.tap-text {
+  margin-top: 1.5rem;
+  font-size: 1.2rem;
+  animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+.splash-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* transparansi gelap */
+  z-index: 0;
+}
+
+.title, .ball, .tap-text {
+  z-index: 1; /* pastikan di atas overlay */
+}
+

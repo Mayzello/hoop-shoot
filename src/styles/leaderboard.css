@@ -1,0 +1,103 @@
+body {
+  margin: 0;
+  font-family: 'Arial Black', sans-serif;
+  background: #000;
+}
+
+.leaderboard-container {
+  background-size: cover;
+  background-position: center;
+  height: 100vh;
+  position: relative;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1;
+}
+
+.leaderboard-content {
+  z-index: 2;
+  text-align: center;
+  max-width: 700px;
+  width: 90%;
+  padding: 30px;
+  background: #ffffff10;
+  border: 2px solid #f57c00;
+  border-radius: 12px;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+}
+
+h2 {
+  font-size: 28px;
+  color: #f57c00;
+  margin-bottom: 20px;
+  text-shadow: 1px 1px 3px black;
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 24px;
+}
+
+.leaderboard-table th,
+.leaderboard-table td {
+  padding: 12px;
+  font-size: 16px;
+  border-bottom: 1px solid #ffffff22;
+}
+
+.leaderboard-table th {
+  background: #f57c00;
+  color: white;
+}
+
+.leaderboard-table tr:nth-child(1) td {
+  color: gold;
+  font-weight: bold;
+}
+.leaderboard-table tr:nth-child(2) td {
+  color: silver;
+  font-weight: bold;
+}
+.leaderboard-table tr:nth-child(3) td {
+  color: #cd7f32;
+  font-weight: bold;
+}
+
+.back-btn {
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.back-btn:hover {
+  background: #125ea9;
+}
+
+/* Fade-in effect */
+.fade-in {
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
