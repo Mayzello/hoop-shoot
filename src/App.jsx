@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import './index.css';
 import SplashScreen from "./components/SplashScreen";
 import LoadingPage from "./components/LoadingScreen"; 
