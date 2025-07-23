@@ -1,9 +1,16 @@
-/* Pastikan body dan html full height & tanpa scroll */
+:root {
+  --text-color: #ffffff;
+  --accent-color: #f57c00;
+  --text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+  --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
 html, body, #root {
   margin: 0;
   padding: 0;
   height: 100%;
   overflow: hidden;
+  touch-action: manipulation; /* Prevent zoom on mobile */
 }
 
 .splash-container {
@@ -13,34 +20,54 @@ html, body, #root {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-
+  background-attachment: fixed;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: white;
-  font-family: sans-serif;
+  color: var(--text-color);
+  font-family: 'Arial', sans-serif;
   overflow: hidden;
   position: relative;
   cursor: pointer;
+  isolation: isolate;
+  user-select: none;
 }
 
+.splash-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.7) 0%,
+    rgba(0, 0, 0, 0.4) 50%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+  z-index: 0;
+}
 
 .title {
-  font-size: 3rem;
+  font-size: clamp(2rem, 8vw, 3rem);
   font-weight: bold;
-  margin-bottom: 2rem;
-  text-shadow: 2px 2px #00000066;
+  margin-bottom: clamp(1rem, 4vw, 2rem);
+  text-shadow: var(--text-shadow);
+  letter-spacing: 1px;
+  z-index: 1;
+  animation: fadeIn 0.8s ease-out forwards;
+  color: var(--accent-color);
 }
 
 .ball {
-  width: 100px;
-  height: 100px;
+  width: clamp(80px, 20vw, 100px);
+  height: clamp(80px, 20vw, 100px);
+  z-index: 1;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  transition: var(--transition);
 }
 
 .bounce {
-  animation: bounce 1s infinite;
+  animation: bounce 1.2s cubic-bezier(0.28, 0.84, 0.42, 1) infinite;
 }
 
 .no-bounce {
@@ -49,35 +76,93 @@ html, body, #root {
 
 @keyframes bounce {
   0%, 100% {
-    transform: translateY(0px);
+    transform: translateY(0) scale(1);
   }
-  50% {
-    transform: translateY(-30px);
+  40% {
+    transform: translateY(-30px) scale(1.1, 0.9);
+  }
+  60% {
+    transform: translateY(-15px) scale(1);
+  }
+  80% {
+    transform: translateY(-5px) scale(1.02);
   }
 }
 
 .tap-text {
-  margin-top: 1.5rem;
-  font-size: 1.2rem;
-  animation: pulse 1.2s infinite;
+  margin-top: clamp(1rem, 3vw, 1.5rem);
+  font-size: clamp(1rem, 3vw, 1.2rem);
+  z-index: 1;
+  animation: pulse 1.5s ease-in-out infinite, float 3s ease-in-out infinite;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 @keyframes pulse {
   0%, 100% {
     opacity: 1;
+    transform: translateY(0);
   }
   50% {
-    opacity: 0.4;
+    opacity: 0.6;
+    transform: translateY(-3px);
   }
 }
-.splash-overlay {
-  position: absolute;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.5); /* transparansi gelap */
-  z-index: 0;
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
 }
 
-.title, .ball, .tap-text {
-  z-index: 1; /* pastikan di atas overlay */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
+/* Press effect */
+.splash-container:active .ball {
+  transform: scale(0.95);
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .title {
+    font-size: 2.2rem;
+  }
+  
+  .ball {
+    width: 90px;
+    height: 90px;
+  }
+  
+  .tap-text {
+    font-size: 1rem;
+  }
+}
+
+/* Dark mode preference */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text-color: #f0f0f0;
+  }
+  
+  .splash-overlay {
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.8) 0%,
+      rgba(0, 0, 0, 0.5) 50%,
+      rgba(0, 0, 0, 0.8) 100%
+    );
+  }
+}

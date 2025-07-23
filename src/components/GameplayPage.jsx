@@ -22,11 +22,12 @@ export default function GameplayPage() {
 
   const ball = useRef({ x: 160, y: 500, vx: 0, vy: 0, isMoving: false });
   const board = useRef({ x: 80, y: 140, width: 200, height: 120 });
-  const ring = useRef({ x: 0, y: 0, width: 280, height: 160 }); // 🔴 Ring diperbesar
+  const ring = useRef({ x: 0, y: 0, width: 280, height: 160 });
   const hasScored = useRef(false);
 
   const scoreRef = useRef(0);
   const comboRef = useRef(0);
+  const scaleRef = useRef({ x: 1, y: 1 });
 
   useEffect(() => {
     const user = auth.currentUser;
@@ -88,18 +89,51 @@ export default function GameplayPage() {
     const user = auth.currentUser;
     if (user) {
       const userRef = ref(db, "users/" + user.uid);
-      const updates = score > storedScore
-        ? { highScore: score, lastScore: score }
-        : { lastScore: score };
+      const updates =
+        score > storedScore
+          ? { highScore: score, lastScore: score }
+          : { lastScore: score };
       update(userRef, updates);
     }
   };
 
   useEffect(() => {
-    // Inisialisasi posisi ring berdasarkan papan
-    board.current = { x: 80, y: 140, width: 200, height: 120 };
-    ring.current.x = board.current.x + (board.current.width / 2) - (ring.current.width / 2);
-    ring.current.y = board.current.y + board.current.height - 10;
+    const handleResize = () => {
+      const canvas = canvasRef.current;
+      const container = canvas.parentElement;
+      const containerWidth = container.clientWidth;
+      const containerHeight = container.clientHeight;
+
+      // Maintain aspect ratio 360x600
+      const scale = Math.min(containerWidth / 360, containerHeight / 600);
+      canvas.width = 360 * scale;
+      canvas.height = 600 * scale;
+      canvas.style.width = `${360 * scale}px`;
+      canvas.style.height = `${600 * scale}px`;
+      
+      scaleRef.current = {
+        x: canvas.width / 360,
+        y: canvas.height / 600
+      };
+
+      // Recalculate board and ring positions
+      board.current = { 
+        x: 80 * scaleRef.current.x, 
+        y: 140 * scaleRef.current.y, 
+        width: 200 * scaleRef.current.x, 
+        height: 120 * scaleRef.current.y 
+      };
+      ring.current = {
+        x: board.current.x + board.current.width / 2 - (280 * scaleRef.current.x) / 2,
+        y: board.current.y + board.current.height - (10 * scaleRef.current.y),
+        width: 280 * scaleRef.current.x,
+        height: 160 * scaleRef.current.y
+      };
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   useEffect(() => {
@@ -134,67 +168,98 @@ export default function GameplayPage() {
     const updateFrame = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      ctx.drawImage(boardImage, board.current.x, board.current.y, board.current.width, board.current.height);
-      ctx.drawImage(ringImage, ring.current.x, ring.current.y, ring.current.width, ring.current.height);
+      ctx.drawImage(
+        boardImage,
+        board.current.x,
+        board.current.y,
+        board.current.width,
+        board.current.height
+      );
+      ctx.drawImage(
+        ringImage,
+        ring.current.x,
+        ring.current.y,
+        ring.current.width,
+        ring.current.height
+      );
 
       if (ball.current.isMoving) {
-        ball.current.vy += 0.14;
-        ball.current.x += ball.current.vx;
-        ball.current.y += ball.current.vy;
+        const prevY = ball.current.y;
+
+        ball.current.vy += 0.14 * scaleRef.current.y;
+        ball.current.x += ball.current.vx * scaleRef.current.x;
+        ball.current.y += ball.current.vy * scaleRef.current.y;
 
         const maxSpeed = 10;
         ball.current.vx = Math.max(Math.min(ball.current.vx, maxSpeed), -maxSpeed);
         ball.current.vy = Math.max(Math.min(ball.current.vy, maxSpeed), -maxSpeed);
 
-        const ballCenterX = ball.current.x;
+        // Score detection
         const ringCenterY = ring.current.y + ring.current.height / 2;
+        const ringLeft = ring.current.x;
+        const ringRight = ring.current.x + ring.current.width;
+        const margin = ring.current.width * 0.35;
+        const ballCenterX = ball.current.x;
+
         const insideHorizontal =
-          ballCenterX > ring.current.x && ballCenterX < ring.current.x + ring.current.width;
+          ballCenterX > ringLeft + margin &&
+          ballCenterX < ringRight - margin;
 
         const passedThroughRing =
           !hasScored.current &&
-          insideHorizontal &&
           ball.current.vy > 0 &&
-          ball.current.y - ball.current.vy < ringCenterY &&
-          ball.current.y >= ringCenterY;
+          prevY < ringCenterY &&
+          ball.current.y >= ringCenterY &&
+          insideHorizontal;
 
         if (passedThroughRing) {
           hasScored.current = true;
           const newCombo = comboRef.current + 1;
-          const newScore = scoreRef.current + 1;
+          const newScore = scoreRef.current + newCombo; // Score increases with combo
           comboRef.current = newCombo;
           scoreRef.current = newScore;
           setCombo(newCombo);
           setScore(newScore);
-          setTimeLeft((prev) => prev + 2);
-          setScoreEffect({ x: 180, y: 300, value: "+1" });
+          setTimeLeft((prev) => prev + 3);
+          setScoreEffect({ 
+            x: 180 * scaleRef.current.x, 
+            y: 300 * scaleRef.current.y, 
+            value: `+${newCombo}` 
+          });
           setTimeout(() => setScoreEffect(null), 600);
           setTimeout(() => {
-            // pindahkan papan, ring ikut fix posisinya
-            const newX = Math.random() * 100 + 40;
-            const newY = Math.random() * 100 + 120;
+            const newX = Math.random() * (100 * scaleRef.current.x) + (40 * scaleRef.current.x);
+            const newY = Math.random() * (100 * scaleRef.current.y) + (120 * scaleRef.current.y);
             board.current.x = newX;
             board.current.y = newY;
-            ring.current.x = newX + (board.current.width / 2) - (ring.current.width / 2);
-            ring.current.y = newY + board.current.height - 10;
+            ring.current.x = newX + board.current.width / 2 - ring.current.width / 2;
+            ring.current.y = newY + board.current.height - (10 * scaleRef.current.y);
             resetBall();
           }, 300);
         }
 
-        if (ball.current.y > canvas.height) {
+        if (ball.current.y > canvas.height && !hasScored.current) {
           setCombo(0);
           comboRef.current = 0;
-          hasScored.current = false;
           resetBall();
         }
       }
 
-      ctx.drawImage(ballImg, ball.current.x - 40, ball.current.y - 40, 80, 80);
+      const ballSize = 80 * Math.min(scaleRef.current.x, scaleRef.current.y);
+      ctx.drawImage(
+        ballImg, 
+        ball.current.x - ballSize/2, 
+        ball.current.y - ballSize/2, 
+        ballSize, 
+        ballSize
+      );
 
-      if (ball.current.x - 40 <= 0 || ball.current.x + 40 >= canvas.width) {
+      // Wall collision
+      const ballRadius = ballSize/2;
+      if (ball.current.x - ballRadius <= 0 || ball.current.x + ballRadius >= canvas.width) {
         ball.current.vx *= -0.7;
-        if (ball.current.x - 40 <= 0) ball.current.x = 40;
-        if (ball.current.x + 40 >= canvas.width) ball.current.x = canvas.width - 40;
+        if (ball.current.x - ballRadius <= 0) ball.current.x = ballRadius;
+        if (ball.current.x + ballRadius >= canvas.width) ball.current.x = canvas.width - ballRadius;
       }
 
       requestAnimationFrame(updateFrame);
@@ -204,15 +269,21 @@ export default function GameplayPage() {
   }, [ballImage]);
 
   const resetBall = () => {
-    ball.current = { x: 160, y: 500, vx: 0, vy: 0, isMoving: false };
+    ball.current = { 
+      x: 160 * scaleRef.current.x, 
+      y: 500 * scaleRef.current.y, 
+      vx: 0, 
+      vy: 0, 
+      isMoving: false 
+    };
     hasScored.current = false;
   };
 
   const handleMouseDown = (e) => {
     if (!ball.current.isMoving && !gameOver) {
       const rect = canvasRef.current.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const x = (e.clientX - rect.left) * (canvasRef.current.width / rect.width);
+      const y = (e.clientY - rect.top) * (canvasRef.current.height / rect.height);
       setStartPos({ x, y });
     }
   };
@@ -220,8 +291,39 @@ export default function GameplayPage() {
   const handleMouseUp = (e) => {
     if (!ball.current.isMoving && !gameOver) {
       const rect = canvasRef.current.getBoundingClientRect();
-      const endX = e.clientX - rect.left;
-      const endY = e.clientY - rect.top;
+      const endX = (e.clientX - rect.left) * (canvasRef.current.width / rect.width);
+      const endY = (e.clientY - rect.top) * (canvasRef.current.height / rect.height);
+
+      const dx = endX - startPos.x;
+      const dy = endY - startPos.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance > 5) {
+        const power = Math.min(distance / 4.5, 22);
+        const angle = Math.atan2(dy, dx);
+        ball.current.vx = Math.cos(angle) * power * 1.1;
+        ball.current.vy = Math.sin(angle) * power * 1.1;
+        ball.current.isMoving = true;
+      }
+    }
+  };
+
+  const handleTouchStart = (e) => {
+    if (!ball.current.isMoving && !gameOver) {
+      e.preventDefault();
+      const rect = canvasRef.current.getBoundingClientRect();
+      const x = (e.touches[0].clientX - rect.left) * (canvasRef.current.width / rect.width);
+      const y = (e.touches[0].clientY - rect.top) * (canvasRef.current.height / rect.height);
+      setStartPos({ x, y });
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    if (!ball.current.isMoving && !gameOver) {
+      e.preventDefault();
+      const rect = canvasRef.current.getBoundingClientRect();
+      const endX = (e.changedTouches[0].clientX - rect.left) * (canvasRef.current.width / rect.width);
+      const endY = (e.changedTouches[0].clientY - rect.top) * (canvasRef.current.height / rect.height);
 
       const dx = endX - startPos.x;
       const dy = endY - startPos.y;
@@ -264,10 +366,19 @@ export default function GameplayPage() {
         height={600}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
         className="game-canvas"
       />
       {scoreEffect && (
-        <div className="score-effect" style={{ left: `${scoreEffect.x}px`, top: `${scoreEffect.y}px` }}>
+        <div
+          className="score-effect"
+          style={{ 
+            left: `${scoreEffect.x}px`, 
+            top: `${scoreEffect.y}px`,
+            transform: 'translate(-50%, -50%)'
+          }}
+        >
           {scoreEffect.value}
         </div>
       )}
@@ -275,11 +386,18 @@ export default function GameplayPage() {
         <div className="game-over-popup">
           <h2>🎮 Game Over</h2>
           <p>Skor: {score}</p>
+          {score > storedScore && <p className="new-highscore">🎉 New High Score!</p>}
           <div className="popup-buttons">
-            <button onClick={() => { saveFinalScore(); navigate("/select-skin"); }}>🎨 Pilih Skin</button>
+            <button onClick={() => { saveFinalScore(); navigate("/select-skin"); }}>
+              🎨 Pilih Skin
+            </button>
             <button onClick={restartGame}>🔁 Main Ulang</button>
-            <button onClick={() => { saveFinalScore(); navigate("/landing"); }}>🏠 Kembali ke Lobby</button>
-            <button onClick={() => { saveFinalScore(); navigate("/leaderboard"); }}>🏆 Leaderboard</button>
+            <button onClick={() => { saveFinalScore(); navigate("/landing"); }}>
+              🏠 Kembali ke Lobby
+            </button>
+            <button onClick={() => { saveFinalScore(); navigate("/leaderboard"); }}>
+              🏆 Leaderboard
+            </button>
           </div>
         </div>
       )}

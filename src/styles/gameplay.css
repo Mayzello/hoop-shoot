@@ -1,21 +1,23 @@
-/* === Container utama === */
+/* === Main Container === */
 .gameplay-container {
   position: relative;
   width: 100vw;
   height: 100vh;
+  min-height: 600px; /* Minimum height to prevent squeezing */
   background-image: url("../assets/bg.png");
   background-size: cover;
   background-position: center;
+  background-attachment: fixed; /* For mobile scrolling behavior */
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* === Overlay gelap untuk efek kontras === */
+/* === Dark Overlay for Contrast === */
 .overlay {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
+  inset: 0; /* Shorthand for top/right/bottom/left */
   background: rgba(0, 0, 0, 0.6);
   z-index: 0;
 }
@@ -28,9 +30,12 @@ canvas,
   border-radius: 12px;
   background-color: #eaeaea;
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
+  max-width: 95vw; /* Prevent canvas from overflowing on mobile */
+  max-height: 90vh;
+  aspect-ratio: 16/9; /* Maintain aspect ratio */
 }
 
-/* === Skor, combo, dan timer (di bar atas) === */
+/* === Game Info (Score, Combo, Timer) === */
 .game-info {
   position: absolute;
   top: 16px;
@@ -38,63 +43,59 @@ canvas,
   transform: translateX(-50%);
   z-index: 2;
   display: flex;
-  gap: 20px;
-  font-size: 18px;
-  background: #ffffff22;
-  padding: 8px 16px;
+  gap: clamp(10px, 2vw, 20px); /* Responsive gap */
+  font-size: clamp(14px, 2vw, 18px); /* Responsive font size */
+  background: rgba(255, 255, 255, 0.13);
+  padding: 8px clamp(8px, 2vw, 16px); /* Responsive padding */
   border-radius: 8px;
   border: 2px solid #f57c00;
   backdrop-filter: blur(4px);
   color: white;
   font-weight: bold;
   text-shadow: 1px 1px 2px black;
+  white-space: nowrap; /* Prevent text wrapping */
 }
 
-/* Optional jika pakai elemen terpisah */
+/* Individual info elements */
 .score, .combo, .timer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-weight: bold;
   color: white;
   text-shadow: 1px 1px 2px black;
 }
 
-/* === Waktu berdenyut merah === */
+/* Pulsing timer animation */
 .timer {
   animation: pulse 1s infinite;
 }
 
 @keyframes pulse {
-  0% { transform: scale(1); }
+  0%, 100% { transform: scale(1); }
   50% { transform: scale(1.08); }
-  100% { transform: scale(1); }
 }
 
-/* === Efek skor muncul saat masuk ring === */
+/* === Score Effect Animation === */
 .score-effect {
   position: absolute;
   transform: translate(-50%, -50%);
-  font-size: 32px;
+  font-size: clamp(24px, 3vw, 32px); /* Responsive font size */
   font-weight: bold;
   color: #00cc00;
-  animation: fadeUp 0.6s ease-out;
+  animation: fadeUp 0.6s ease-out forwards;
   pointer-events: none;
   z-index: 20;
+  text-shadow: 0 0 8px rgba(0, 0, 0, 0.7);
 }
 
 @keyframes fadeUp {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(1);
-  }
-  20% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -80%) scale(1.2);
-  }
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -80%) scale(1.2); }
 }
 
-/* === Game Over Pop-up === */
+/* === Game Over Popup === */
 .game-over-popup {
   position: absolute;
   top: 50%;
@@ -103,47 +104,83 @@ canvas,
   z-index: 10;
   background: rgba(0, 0, 0, 0.9);
   color: white;
-  padding: 30px;
+  padding: clamp(20px, 3vw, 30px); /* Responsive padding */
   border-radius: 12px;
   text-align: center;
-  width: 300px;
+  width: min(90vw, 300px); /* Responsive width */
   border: 2px solid #f57c00;
   box-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
 
 .game-over-popup h2 {
-  margin-bottom: 20px;
-  font-size: 2rem;
+  margin-bottom: clamp(15px, 2vw, 20px);
+  font-size: clamp(1.5rem, 4vw, 2rem);
   color: #f57c00;
   text-shadow: 1px 1px 2px black;
 }
 
 .game-over-popup p {
-  margin-bottom: 10px;
-  font-size: 1.2rem;
+  margin-bottom: clamp(8px, 1vw, 10px);
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
 }
 
-/* === Tombol-tombol popup === */
+/* === Popup Buttons === */
 .popup-buttons {
-  margin-top: 20px;
+  margin-top: clamp(15px, 2vw, 20px);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: clamp(8px, 1vw, 10px);
 }
 
 .popup-buttons button {
-  padding: 10px 20px;
-  font-size: 1rem;
+  padding: clamp(8px, 1vw, 10px) clamp(12px, 2vw, 20px);
+  font-size: clamp(0.9rem, 2vw, 1rem);
   font-weight: bold;
   border: none;
   border-radius: 8px;
   background-color: #1976d2;
   color: white;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s;
   width: 100%;
 }
 
 .popup-buttons button:hover {
   background-color: #125ea9;
+  transform: translateY(-2px);
+}
+
+/* === Mobile Responsiveness === */
+@media (max-width: 768px) {
+  .gameplay-container {
+    min-height: 100vh; /* Full viewport height */
+  }
+
+  .game-info {
+    top: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 90%;
+  }
+
+  .popup-buttons {
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .popup-buttons button {
+    width: auto;
+    flex: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .game-info {
+    font-size: 12px;
+    gap: 8px;
+  }
+
+  .popup-buttons {
+    flex-direction: column;
+  }
 }

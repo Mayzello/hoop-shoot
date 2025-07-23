@@ -1,38 +1,44 @@
 .curtain-wrapper {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   z-index: 9999;
   display: flex;
   pointer-events: none;
 }
 
-/* Kiri & kanan: masing-masing 50% */
 .curtain {
-  width: 50vw;
-  height: 100vh;
+  width: 50%;
+  height: 100%;
   background-repeat: no-repeat;
-  background-size: 200% 100%; /* supaya cuma tampil setengah */
+  background-size: cover;
   transition: transform 0.6s ease-in-out;
+  will-change: transform; /* Optimizes animations */
 }
 
-/* Tirai kiri: tampilkan bagian kiri gambar */
 .curtain.left {
-  background-image: url("../assets/full.png"); /* satu gambar utuh */
-  background-position: left center;
+  background-position: right center;
   transform: translateX(-100%);
 }
 
-/* Tirai kanan: tampilkan bagian kanan gambar */
 .curtain.right {
-  background-image: url("../assets/full.png");
-  background-position: right center;
+  background-position: left center;
   transform: translateX(100%);
 }
 
-/* Saat aktif: tirai menutup ke tengah */
 .curtain-wrapper.active .curtain.left {
   transform: translateX(0);
 }
+
 .curtain-wrapper.active .curtain.right {
   transform: translateX(0);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .curtain {
+    transition: transform 0.4s ease-in-out; /* Faster transition on mobile */
+  }
 }
